@@ -1,27 +1,99 @@
+import base64
+import requests
 from rest_framework import serializers
-from .models import Company, Document, Signer
+from django.conf import settings
+from .models import Document, Signer, Company
+import os
 
 
-class CompanySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Company
-        fields = '__all__'
+class SignerSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=255, required=True)
+    email = serializers.EmailField(required=True)
 
-class SignerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Signer
-        fields = '__all__'
 
 class DocumentSerializer(serializers.ModelSerializer):
-    signers = SignerSerializer(many=True)
+    signer_document = SignerSerializer(many=True, required=True)
+    name = serializers.CharField(max_length=255, required=True)
+    created_by = serializers.CharField(max_length=255, required=True)
+    external_id = serializers.URLField(required=True)
 
     class Meta:
         model = Document
-        fields = '__all__'
+        fields = [
+            'id', 'name', 'created_by', 'external_id', 'signer_document',
+        ]
 
     def create(self, validated_data):
-        signers_data = validated_data.pop('signers')
-        document = Document.objects.create(**validated_data)
-        for signer_data in signers_data:
-            Signer.objects.create(document=document, **signer_data)
+        signer_data = validated_data.pop('signer_document', [])
+        api_token = os.getenv("COMPANY_API_TOKEN")
+
+        if not api_token:
+            raise serializers.ValidationError("API ZapSign Token not found. Please check your .env file.")
+
+        try:
+            company = Company.objects.get(api_token=api_token)
+        except Company.DoesNotExist:
+            raise serializers.ValidationError(f"API Token for this Company not found.")
+
+        pdf_url = validated_data['external_id']
+        pdf_response = requests.get(pdf_url)
+        if pdf_response.status_code != 200:
+            raise serializers.ValidationError(
+                f"Error downloading PDF: {pdf_response.status_code} - {pdf_response.text}"
+            )
+
+        base64_pdf = base64.b64encode(pdf_response.content).decode('utf-8')
+
+        signers = [{"name": signer['name'], "email": signer['email']} for signer in signer_data]
+
+        document_data = {
+            "name": validated_data['name'],
+            "base64_pdf": base64_pdf,
+            "signers": signers,
+        }
+
+        zapsign_url = os.getenv("ZAPSIGN_URL")
+        headers = {
+            "Authorization": f"Bearer {api_token}",
+            "Content-Type": "application/json"
+        }
+
+        response = requests.post(zapsign_url, json=document_data, headers=headers)
+
+        if response.status_code != 200:
+            raise serializers.ValidationError(f"Error on document creation: {response.text}")
+
+        response_data = response.json()
+        open_id = response_data.get('open_id')
+
+        if not open_id:
+            raise serializers.ValidationError("Field 'open_id' not returned by the API.")
+
+        document = Document.objects.create(
+            name=validated_data['name'],
+            created_by=validated_data['created_by'],
+            external_id=validated_data['external_id'],
+            token=response_data.get('token'),
+            open_id=open_id,
+            company_id=company.id,
+        )
+
+        for signer in signer_data:
+            Signer.objects.create(document=document, **signer)
+
         return document
+
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.created_by = validated_data.get('created_by', instance.created_by)
+        instance.external_id = validated_data.get('external_id', instance.external_id)
+        signer_data = validated_data.get('signer_document', [])
+
+        if signer_data is not None:
+            instance.signer_document.all().delete()
+
+            for signer in signer_data:
+                Signer.objects.create(document=instance, **signer)
+
+        instance.save()
+        return instance
