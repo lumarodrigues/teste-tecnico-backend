@@ -1,0 +1,5 @@
+POSTGRES_USER=seu_usuario
+POSTGRES_PASSWORD=sua_senha
+POSTGRES_DB=nome_do_banco
+COMPANY_NAME=nome_da_empresa
+API_TOKEN=seu_api_token
