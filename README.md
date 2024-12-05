@@ -61,6 +61,21 @@ Isso vai iniciar os containers do Django e do PostgreSQL.
 
 Este comando também irá buscar as variáveis de ambiente `COMPANY_NAME` e `API_TOKEN` e criará uma empresa no banco de dados.
 
+
+### 5. Rodar os testes
+
+Os testes devem ser executados dentro do container. Para entrar no container:
+
+```bash
+docker-compose run web bash
+```
+
+E, em seguida:
+
+```bash
+pytest
+```
+
 ## 🚀 Acessando a Aplicação
 A aplicação Django estará disponível em [http://127.0.0.1:8001/](http://127.0.0.1:8001/).  
 A API estará acessível em [http://127.0.0.1:8001/api/v1/documents/](http://127.0.0.1:8001/api/v1/documents/).

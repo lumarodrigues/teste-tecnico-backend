@@ -25,15 +25,11 @@ class DocumentSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         signer_data = validated_data.pop('signer_document', [])
-        api_token = os.getenv("COMPANY_API_TOKEN")
-
-        if not api_token:
-            raise serializers.ValidationError("API ZapSign Token not found. Please check your .env file.")
 
         try:
-            company = Company.objects.get(api_token=api_token)
+            company = Company.objects.last()
         except Company.DoesNotExist:
-            raise serializers.ValidationError(f"API Token for this Company not found.")
+            raise serializers.ValidationError(f"Company not found.")
 
         pdf_url = validated_data['external_id']
         pdf_response = requests.get(pdf_url)
@@ -54,7 +50,7 @@ class DocumentSerializer(serializers.ModelSerializer):
 
         zapsign_url = os.getenv("ZAPSIGN_URL")
         headers = {
-            "Authorization": f"Bearer {api_token}",
+            "Authorization": f"Bearer {company.api_token}",
             "Content-Type": "application/json"
         }
 
