@@ -15,9 +15,12 @@ services:
     build: .
     container_name: django_container
     command: >
-      bash -c "python manage.py migrate &&
-               python manage.py create_company && 
-               python manage.py runserver 0.0.0.0:8001"
+      bash -c "echo 'Executando migrações...' &&
+              python manage.py migrate &&
+              echo 'Migrações concluídas.' &&
+              python manage.py create_company && 
+              python manage.py runserver 0.0.0.0:8001"
+
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -25,6 +28,7 @@ services:
       COMPANY_NAME: ${COMPANY_NAME}
       COMPANY_API_TOKEN: ${COMPANY_API_TOKEN}
       ZAPSIGN_URL: ${ZAPSIGN_URL}
+      DB_HOST: ${DB_HOST}
     volumes:
       - .:/app
     ports:
