@@ -23,6 +23,7 @@ class Document(models.Model):
     created_by = models.CharField(max_length=255)
     external_id = models.CharField(max_length=255, null=True, blank=True)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="company_document")
+    pdf_url = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return self.name

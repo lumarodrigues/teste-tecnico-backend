@@ -7,7 +7,7 @@ def test_create_document(db, client, company, document_url, api_url):
     payload = {
         "name": "Contrato",
         "created_by": "Test User 1",
-        "external_id": document_url,
+        "pdf_url": document_url,
         "signer_document": [
             {
                 "name": "Test User 2",
@@ -45,9 +45,18 @@ def test_delete_document(client, document):
     assert response.status_code == 204
 
 
-# def test_create_document_failure():
-#     pass
-
-
-# def test_edit_document_failure():
-#     pass
+def test_create_document_failure(db, client):
+    payload = {
+        "name": "Contrato",
+        "created_by": "Test User 1",
+        "pdf_url": "",
+        "signer_document": [
+            {
+                "name": "Test User 2",
+                "email": "testuser2@example.com"
+            }
+        ]
+    }
+    response = client.post(reverse("document-list"), payload, content_type="application/json")
+    assert response.status_code == 400
+    assert response.json() == {'pdf_url': ['This field may not be blank.']}

@@ -15,12 +15,12 @@ class DocumentSerializer(serializers.ModelSerializer):
     signer_document = SignerSerializer(many=True, required=True)
     name = serializers.CharField(max_length=255, required=True)
     created_by = serializers.CharField(max_length=255, required=True)
-    external_id = serializers.URLField(required=True)
+    pdf_url = serializers.URLField(required=True)
 
     class Meta:
         model = Document
         fields = [
-            'id', 'name', 'created_by', 'external_id', 'signer_document',
+            'id', 'name', 'created_by', 'pdf_url', 'signer_document',
         ]
 
     def create(self, validated_data):
@@ -31,7 +31,7 @@ class DocumentSerializer(serializers.ModelSerializer):
         except Company.DoesNotExist:
             raise serializers.ValidationError(f"Company not found.")
 
-        pdf_url = validated_data['external_id']
+        pdf_url = validated_data['pdf_url']
         pdf_response = requests.get(pdf_url)
         if pdf_response.status_code != 200:
             raise serializers.ValidationError(
@@ -68,7 +68,7 @@ class DocumentSerializer(serializers.ModelSerializer):
         document = Document.objects.create(
             name=validated_data['name'],
             created_by=validated_data['created_by'],
-            external_id=validated_data['external_id'],
+            pdf_url=validated_data['pdf_url'],
             token=response_data.get('token'),
             open_id=open_id,
             company_id=company.id,
@@ -82,7 +82,7 @@ class DocumentSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)
         instance.created_by = validated_data.get('created_by', instance.created_by)
-        instance.external_id = validated_data.get('external_id', instance.external_id)
+        instance.pdf_url = validated_data.get('pdf_url', instance.pdf_url)
         signer_data = validated_data.get('signer_document', [])
 
         if signer_data is not None:
