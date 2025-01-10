@@ -3,5 +3,5 @@ POSTGRES_PASSWORD=sua_senha
 POSTGRES_DB=nome_do_banco
 COMPANY_NAME=nome_da_empresa
 COMPANY_API_TOKEN=seu_api_token
-ZAPSIGN_URL=url_api_externa_zapsign
+EXTERNAL_URL=url_api_externa
 DB_HOST=db_host

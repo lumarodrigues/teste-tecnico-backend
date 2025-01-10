@@ -48,13 +48,13 @@ class DocumentSerializer(serializers.ModelSerializer):
             "signers": signers,
         }
 
-        zapsign_url = os.getenv("ZAPSIGN_URL")
+        external_url = os.getenv("EXTERNAL_URL")
         headers = {
             "Authorization": f"Bearer {company.api_token}",
             "Content-Type": "application/json"
         }
 
-        response = requests.post(zapsign_url, json=document_data, headers=headers)
+        response = requests.post(external_url, json=document_data, headers=headers)
 
         if response.status_code != 200:
             raise serializers.ValidationError(f"Error on document creation: {response.text}")

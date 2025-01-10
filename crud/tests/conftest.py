@@ -17,7 +17,7 @@ def document_url(responses):
 
 @pytest.fixture
 def api_url(responses):
-    url = os.getenv("ZAPSIGN_URL")
+    url = os.getenv("EXTERNAL_URL")
     responses.add(responses.POST, url, body='{"open_id": "1234", "token": "a1b2c3d4"}', content_type="application/json")
     return url
 

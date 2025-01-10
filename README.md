@@ -1,7 +1,7 @@
 
-# zapsign-backend
+# teste-tecnico-backend
 
-Este repositório contém o backend da aplicação Zapsign, que utiliza Django e PostgreSQL para gerenciamento de dados e recursos.
+Este repositório contém o backend de uma aplicação que utiliza Django e PostgreSQL para gerenciamento de dados e recursos.
 
 ## 🛠️ Tecnologias Utilizadas
 - **Django**: Framework para construção da aplicação web.
@@ -20,7 +20,7 @@ Antes de rodar o projeto, você precisa ter o Docker e o Docker Compose instalad
 Clone o repositório para a sua máquina local:
 
 ```bash
-git clone git@github.com:lumarodrigues/zapsign-backend.git
+git clone git@github.com:lumarodrigues/teste-tecnico-backend.git
 ```
 
 ### 2. Criar o banco de dados
@@ -47,7 +47,7 @@ POSTGRES_PASSWORD=sua_senha
 POSTGRES_DB=nome_do_banco
 COMPANY_NAME=nome_da_empresa
 COMPANY_API_TOKEN=seu_api_token
-ZAPSIGN_URL=url_api_externa_zapsign
+EXTERNAL_URL=url_api_externa
 DB_HOST=db_host
 ```
 
